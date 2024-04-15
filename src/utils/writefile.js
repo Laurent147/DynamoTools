@@ -8,9 +8,11 @@ class Writefile {
     this.writer = fs.createWriteStream(extractFile, { flags: 'a' });
     this.logs = fs.createWriteStream(logFile, { flags: 'a' });
 
-    const headerText = headers.reduce((acc, cur) => `${acc},"${cur}"`, '').substring(1);
+    if (headers) {
+      const headerText = headers.reduce((acc, cur) => `${acc},"${cur}"`, '').substring(1);
+      this.writer.write(`${headerText}`);
+    }
 
-    this.writer.write(`${headerText}`);
     this.logs.write(`Process start running at ${new Date()}\n`);
 
     this.counter = 0;
@@ -19,7 +21,7 @@ class Writefile {
   writer;
   logs;
 
-  writeData = async (data) =>{
+  writeDataCVS = async (data) =>{
     try {
       let record = '';
       let val = '';
@@ -36,6 +38,14 @@ class Writefile {
       }
       
       await this.writer.write(record);
+    } catch (err) {
+      await this.logs.write(`${err?.message}\n`);
+    }
+  }
+
+  writeLine = async (data) => {
+    try {
+      await this.writer.write(`${data}\n`);
     } catch (err) {
       await this.logs.write(`${err?.message}\n`);
     }

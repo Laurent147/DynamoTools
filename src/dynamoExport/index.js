@@ -66,7 +66,7 @@ const main = async (id) => {
         const regExpPattern = '"sourceUrl":"([^"]*)"'
         const attr = await findAttribute(JSON.stringify(res), regExpPattern);
         // console.log('Results: ', {id: res.id, campaignId: res.campaignId, attr});
-        wf.writeData([res.id, res.campaignId, attr]);
+        wf.writeDataCVS([res.id, res.campaignId, attr]);
       }
     }
   });
