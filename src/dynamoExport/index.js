@@ -12,14 +12,14 @@ const env = getEnvironment();
 const DynQueryClass = require('./utils/dynamoClass');
 const readline = require('../utils/readfile');
 const writeFile = require("../utils/writefile");
-const campaignSchema = require('./schemas/campaign-schema');
+// const campaignSchema = require('./schemas/campaign-schema');
 const pageSchema = require('./schemas/page-schema');
 
 const DATA_DIR = './data'
 
-const dataFile = path.join(__dirname,'pages.csv')
-const extractFile = path.join(__dirname, 'extract.csv');
-const logFile = path.join(__dirname,'extract-log.txt');
+const dataFile = path.join(__dirname, DATA_DIR, 'pageIds_test.txt')
+const extractFile = path.join(__dirname, DATA_DIR, 'extract.csv');
+const logFile = path.join(__dirname, DATA_DIR, 'extract-log.txt');
 
 const globalAWSConfig = {
     credentials: {
@@ -29,7 +29,7 @@ const globalAWSConfig = {
     region: env.AWS_REGION_PROD
 };
 
-const TABLE_NAME = env.PROD_CAMPAIGN_TABLE;
+const TABLE_NAME = env.PROD_PAGE_TABLE;
 
 const findAttribute = async (stringObj, regExpPattern) => {
   const reg = new RegExp(regExpPattern, 'g');
@@ -55,7 +55,8 @@ const main = async (id) => {
   const wf = new writeFile({
     extractFile,
     logFile,
-    headers: ['id', 'campaignId', 'sourceUrl']
+    headers: ['id', 'campaignId','url', 'name', 'sourceUrl', 'status', 'published', 'updatedAt', 'lastUpdatedBy', 'createdAt', 'createdBy' ],
+    isCSV: true
   });
 
   readline(dataFile, async (line) => {
@@ -66,7 +67,9 @@ const main = async (id) => {
         const regExpPattern = '"sourceUrl":"([^"]*)"'
         const attr = await findAttribute(JSON.stringify(res), regExpPattern);
         // console.log('Results: ', {id: res.id, campaignId: res.campaignId, attr});
-        wf.writeDataCVS([res.id, res.campaignId, attr]);
+        if (!!attr) {
+          wf.writeToCSV([res.id, res.campaignId, res.url, res.name, attr, res.status, res.published, res.updatedAt, res.lastUpdatedBy, res.createdAt, res.createdBy]);
+        }
       }
     }
   });

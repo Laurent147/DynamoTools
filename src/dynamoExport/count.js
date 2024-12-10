@@ -11,14 +11,14 @@ const env = getEnvironment();
 // app imports
 const DynQueryClass = require('./utils/dynamoClass');
 const entrySchema = require('./schemas/entry-schema');
-const TABLE_NAME = env.PROD_ENTRY_TABLE;
+const TABLE_NAME = env.QA_CAMPAIGN_TABLE;
 
 const globalAWSConfig = {
     credentials: {
-        accessKeyId: env.AWS_ACCESS_KEY_ID_PROD,
-        secretAccessKey: env.AWS_SECRET_ACCESS_KEY_PROD
+        accessKeyId: env.AWS_ACCESS_KEY_ID_DEVQA,
+        secretAccessKey: env.AWS_SECRET_ACCESS_KEY_DEVQA
     },
-    region: env.AWS_REGION_PROD
+    region: env.AWS_REGION_DEVQA
 };
 
 const main = async () => {
@@ -27,7 +27,7 @@ const main = async () => {
   const id = 'dd8fb982fcde446aa9fb87827f92cc4e'
   const index = 'campaignId'
 
-  const results = await dyn.findItemCountByIndex(key, id, index);
+  const results = await dyn.findItemCount();
   console.log(results);
 }
 

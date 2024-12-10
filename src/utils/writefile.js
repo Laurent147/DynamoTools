@@ -4,12 +4,14 @@ let firstTime = true;
 
 class Writefile {
   constructor(params) {
-    const { extractFile, logFile, headers } = params; 
+    const { extractFile, logFile, headers, isCSV } = params; 
     this.writer = fs.createWriteStream(extractFile, { flags: 'a' });
     this.logs = fs.createWriteStream(logFile, { flags: 'a' });
+    this.headers = headers;
 
-    if (headers) {
+    if (headers && isCSV) {
       const headerText = headers.reduce((acc, cur) => `${acc},"${cur}"`, '').substring(1);
+      console.log(`Headers : ${headerText}`)
       this.writer.write(`${headerText}`);
     }
 
@@ -21,7 +23,11 @@ class Writefile {
   writer;
   logs;
 
-  writeDataCVS = async (data) =>{
+  /**
+   * 
+   * @param {*} data as an array of strings, value order should match the  
+   */
+  writeToCSV = async (data) =>{
     try {
       let record = '';
       let val = '';
@@ -38,6 +44,21 @@ class Writefile {
       }
       
       await this.writer.write(record);
+    } catch (err) {
+      await this.logs.write(`${err?.message}\n`);
+    }
+  }
+
+  writeToJson = async (data) => {
+    try {
+      let record = '{';
+      let i = 0;
+      for(const field of this.headers){
+        record += `"${field}": "${data[i]}"`
+        i += 1
+      }
+      record += '},'
+      await this.writer.write(`${data}\n`);
     } catch (err) {
       await this.logs.write(`${err?.message}\n`);
     }

@@ -1,18 +1,20 @@
-const path = require("path");
-const ProgressBar = require("progress");
 const readline = require("../utils/readfile");
 const writeFile = require("../utils/writefile");
+const ProgressBar = require("progress");
 const config = require("./config");
+const path = require("path");
 
 const {
+  aggregatedExport,
   files,
   sourceFolder,
   extractFolder,
   logFileName,
   patterns,
-  conditionalToExclude
+  conditionalToExclude,
+  postProcess
 } = config;
-const promoId = '5f5a6c83-7937-4eda-858d-f2e3ba59fa46';
+
 const extractData = (line) => {
   const record = [];
   for (let [key, pattern] of patterns) { 
@@ -41,61 +43,61 @@ const logSummary = (start, counter1, counter2) => {
 }
 
 processFiles = async () => {
-  
-  const extractFile = path.join(__dirname, extractFolder,`promodata2.json`);
   const logFile = path.join(__dirname, extractFolder,logFileName);
-  const wf = new writeFile({
-    extractFile,
-    logFile
-  });
-  let totalRow = 0;
-  let totalExtracted = 0;
-  const starttotal = new Date();
+  let wf;
+
+  if (aggregatedExport) {
+    const extractFile = path.join(__dirname, extractFolder,'Aggregated_Export.csv');
+    wf = new writeFile({
+      extractFile,
+      logFile,
+      headers: patterns.map(el => el[0]),
+      isCSV: true
+    });
+  }
+
   for (let filename of files) {
     const start = new Date();
     const dataFile = path.join(__dirname, sourceFolder, filename);
-    
-    
+
     console.log(`\nProcess started for ${filename}\nCounting number of records:`);
     let counter = 0;
     await readline(dataFile, (line) => {
       counter += 1;
     });   
     console.log(`--> ${format1000s(counter)} records in file`);
-    totalRow += counter;
-
+    
     const bar = new ProgressBar('Processing [:bar] :percent :etas', {
-    complete: '=',
-    incomplete: ' ',
-    width: 20,
-    total: counter,
-  });
+      complete: '=',
+      incomplete: ' ',
+      width: 20,
+      total: counter,
+    });
+
+    if (!aggregatedExport) {
+      const extractFile = path.join(__dirname, extractFolder,`${filename}.csv`);
+      wf = new writeFile({
+        extractFile,
+        logFile,
+        headers: patterns.map(el => el[0]),
+        isCSV: true
+      });
+    }
     
     let counter2 =0;
     await readline(dataFile, async (line) => {
-      const data = extractData(line);
+      let data = extractData(line);
       bar.tick();
-      if (conditionalToExclude && conditionalToExclude(data)) return;
-      counter2 += 1;
-      const ESJsonData = {
-        id: data[0],
-        promotionId: data[1],
-        campaignId: data[2],
-        createdAt: data[3],
-        updatedAt: data[4],
-        status: data[5],
-        email: data[6],
-        country: data[7],
-        weight: data[8]
+      if (conditionalToExclude && conditionalToExclude(data)) return; 
+      if (postProcess) {
+        data = postProcess(data);
       }
-      const ESJsonStr = JSON.stringify(ESJsonData);
-      await wf.writeLine(ESJsonStr);
+      await wf.writeToCSV(data);
+      counter2 += 1;
     });
 
     logSummary(start, counter, counter2);
-    totalExtracted += counter2;
   }
-  logSummary(starttotal, totalRow, totalExtracted);
 }
 
 processFiles();

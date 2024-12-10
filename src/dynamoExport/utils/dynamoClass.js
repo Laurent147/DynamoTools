@@ -37,7 +37,7 @@ class dynamoQuery {
     }
   };
 
-  async findItemCount (key, id) {
+  async findItemCountByKey (key, id) {
     const start = new Date().getTime();
     try {
       const resp = await this.model
@@ -55,7 +55,24 @@ class dynamoQuery {
     }
   };
 
-  async findItemCountByIndex (key, id, index) {
+  async findItemCount () {
+    const start = new Date().getTime();
+    try {
+      const resp = await this.model
+        .scan()
+        .all()
+        .count()
+        .exec();
+      console.log(`Query ended in ${convertDuration(start)}`);
+      return resp;
+    } catch (error) {
+      console.log('There was a error....\n',error);
+      console.log(`Query ended in ${new Date().getTime() - start}ms`);
+      return null;
+    }
+  };
+
+  async findItemCountByKeyByIndex (key, id, index) {
     const start = new Date().getTime();
     try {
       const resp = await this.model
