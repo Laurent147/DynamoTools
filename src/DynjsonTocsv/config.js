@@ -44,7 +44,7 @@ const config = {
     ["slug", /"slug":{"S":"([^"]*)"}/],
   ],
   conditionalToExclude: (data) => {
-    return Number(data[0])  < 1704096000000
+    // return Number(data[0])  < 1704096000000
   },
   postProcess: (data) => {
     return data

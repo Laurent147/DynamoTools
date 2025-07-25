@@ -1,12 +1,12 @@
 const config = {
   files:[
-    // "laurent_test.json",
-    "laurent_file1.json",
-    "laurent_file2.json",
-    "laurent_file3.json",
-    "laurent_file4.json",
-    // "laurent_file5.json",
-    // "laurent_file6.json",
+    // "test.json",
+    "file1.json",
+    "file2.json",
+    "file3.json",
+    "file4.json",
+    "file5.json",
+    "file6.json",
     // "laurent_file7.json",
     // "laurent_file8.json"
     // "laurent_raw_promodata.json"
@@ -16,26 +16,28 @@ const config = {
   logFileName: "extract_log.txt",
   patterns: [
     ["id", /"id":{"S":"([^"]*)"}/],
-    // ["promotionId", /"promotionId":{"S":"([^"]*)"}/],
-    // ["campaignId", /"campaignId":{"S":"([^"]*)"}/],
-    // ["createdAt", /"createdAt":{"N":"([^"]*)"}/],
+    ["campaignId", /"campaignId":{"S":"([^"]*)"}/],
+    ["version", /"version":{"N":"([^"]*)"}/],
+    ["createdAt", /"createdAt":{"N":"([^"]*)"}/],
+    ["name", /"name":{"S":"([^"]*)"}/],
+    ["published", /"published":{"S":"([^"]*)"}/],
+    ["unpublished", /"unpublished":{"BOOL":([^}]*)}/],
+    ["promotionType", /"promotionType":{"S":"([^"]*)"}/],
+    ["router", /"router":{"S":"(.*?})"},?/], // JSON //
     // ["updatedAt", /"updatedAt":{"N":"([^"]*)"}/],
+    // ["promotionId", /"promotionId":{"S":"([^"]*)"}/],
     // ["status", /"status":{"S":"([^"]*)"}/],
     // ["email", /"email":{"S":"([^"]*)"}/],
     // ["country", /"country":{"S":"([^"]*)"}/],
     // ["weight", /"weight":{"N":"([^"]*)"}/],
-    // ["name", /"name":{"S":"([^"]*)"}/],
     // ["createdBy", /"createdBy":{"S":"([^"]*)"}/],
     // ["teams", /"teams":{"L":\[([^\]]*)\]}/],
     // ["artist", /"artist":{"M":{(.*)}},/],
     // ["featuredArtists", /"featuredArtists":{"L":\[([^\]]*)\]}/],
     // ["description", /"description":{"S":"([^"]*)"}/],
-    // ["published", /"published":{"S":"([^"]*)"}/],
-    // ["unpublished", /"unpublished":{"BOOL":([^}]*)}/],
     // ["templateType", /"templateType":{"S":"([^"]*)"}/],
     // ["templateOption", /"templateOption":{"S":"([^"]*)"}/],
     // ["clonedFrom", /"clonedFrom":{"S":"([^"]*)"}/],
-    // ["promotionType", /"promotionType":{"S":"([^"]*)"}/],
     // ["widgets", /"widgets":{"L":\[([^\]]*)\]}/],
     // ["territory", /"territory":{"S":"(.*)"},"favIconUrl/], // JSON //
     // ["createdDate", /"createdDate":{"N":"([^"]*)"}/],
@@ -45,7 +47,6 @@ const config = {
     // ["endDate", /"endDate":{"N":"([^"]*)"}/],
     // ["themeObject", /"themeObject":{"S":"(.*)"},"endDate"/], // JSON //
     // ["css", /"css":{"S":"([^"]*)"}/],
-    // ["router", /"router":{"S":"(.*)"},"widgets"/], // JSON //
     // ["path", /"path":{"L":\[([^\]]*)\]}/],
     // ["slug", /"slug":{"S":"([^"]*)"}/],
   ],

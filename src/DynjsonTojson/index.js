@@ -12,7 +12,7 @@ const {
   patterns,
   conditionalToExclude
 } = config;
-const promoId = '5f5a6c83-7937-4eda-858d-f2e3ba59fa46';
+// const promoId = '5f5a6c83-7937-4eda-858d-f2e3ba59fa46';
 const extractData = (line) => {
   const record = [];
   for (let [key, pattern] of patterns) { 
@@ -42,7 +42,7 @@ const logSummary = (start, counter1, counter2) => {
 
 processFiles = async () => {
   
-  const extractFile = path.join(__dirname, extractFolder,`pageIds.txt`);
+  const extractFile = path.join(__dirname, extractFolder,`campaign-version-${new Date().getTime()}.js`);
   const logFile = path.join(__dirname, extractFolder,logFileName);
   const wf = new writeFile({
     extractFile,
@@ -51,6 +51,7 @@ processFiles = async () => {
   let totalRow = 0;
   let totalExtracted = 0;
   const starttotal = new Date();
+  await wf.writeLine('const campaignVersions = [');
 
   // const excludeValues = require('./ETL_export/hackers');
   // const keep =new Map();
@@ -81,33 +82,51 @@ processFiles = async () => {
       bar.tick();
       if (conditionalToExclude && conditionalToExclude(data, excludeValues, keep)) return;
       counter2 += 1;
-      // const ESJsonData = {
-      //   id: data[0],
-      //   promotionId: data[1],
-      //   campaignId: data[2],
-      //   createdAt: data[3],
-      //   updatedAt: data[4],
-      //   status: data[5],
-      //   weight: data[8],
-      //   submission: {
-      //     email: data[6],
-      //     country: data[7]
-      //   }
-      // }
+
+      let pageIds = [];
+      try {
+        let cleaned = data[8].replace(/\\/g,'');
+        cleaned = cleaned.replace(/\\/g,'');
+        const router = JSON.parse(cleaned);
+
+        if (router?.routes && router.routes.length) {
+          for (const route of router.routes) {
+            if (route?.default) {
+              pageIds.push(route.default);
+            }
+          }
+        }
+      } catch (err) {
+        console.log(err);
+        wf.logs.write(`couldn\'t parse router for record id: ${data[0]}\n`);
+      }
+
+      const ESJsonData = {
+        id: data[0],
+        campaignId: data[1],
+        version: data[2],
+        createdAt: data[3],
+        name: data[4],
+        published: data[5],
+        unpublished: data[6],
+        promotionType: data[7],
+        routes: pageIds.length ? pageIds : null
+      }
       // const ESJsonStr = JSON.stringify(ESJsonData);
       // for( let i= 0; i < +ESJsonData.weight; i++) {
-        // await wf.writeLine(line);
-        await wf.writeLine(`${data[0]}`);
+      //   await wf.writeLine(line);
       // }
-      // totalEntries += +ESJsonData.weight;
+      await wf.writeLine(`${JSON.stringify(ESJsonData)},`);
+      totalEntries += +ESJsonData.weight;
     });
 
+    
     logSummary(start, counter, counter2);
     totalExtracted += counter2;
   }
+
+  await wf.writeLine(']');
   logSummary(starttotal, totalRow, totalExtracted);
-
-
 
   // console.log('keep map size', keep.size);
   // keep.forEach((val, key, map) => {
